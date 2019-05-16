@@ -44,11 +44,11 @@ async function init () {
   const batches = await makeBatches(parsedCSV, 3)
   log('BATCHES\n', batches)
 
-  const validBatches = await batches.reduce(async (acc, cur) => {
-    const result = await acc
-    const r = await server.checkDupl(cur.map(x => x.email))
-    return [...result, cur.filter(x => r.includes(x.email))]
-  }, Promise.resolve([]))
+  const validBatches = await batches.reduce(async (acc, cur) =>
+    [...(await acc),
+      cur.filter(async x => (await server.checkDupl(cur.map(x => x.email)))
+        .includes(x.email))]
+  , Promise.resolve([]))
   log('VALIDEMAILS\n', validBatches)
 
   const flatBatch = validBatches.reduce((acc, cur) =>
